@@ -1,0 +1,49 @@
+version: "2"
+
+services:
+  # data volume container
+  nginx_config:
+    container_name: nginx_config
+    image: cirros
+    volumes:
+      - /etc/conf
+    command: /bin/true
+
+  # service discovery
+  interlock:
+    container_name: interlock
+    image: etoews/interlock
+    command: -D run
+    networks:
+      - backend
+    ports:
+      - "80:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    volumes_from:
+      - nginx_config
+
+  # load balancer
+  lb:
+    container_name: lb
+    image: nginx:1.9
+    entrypoint: nginx
+    command: -g "daemon off;" -c /etc/conf/nginx.conf
+    networks:
+      - backend
+    labels:
+      - "interlock.ext.name=nginx"
+    volumes_from:
+      - nginx_config
+
+  # app
+  app:
+    image: ehazlett/docker-demo:latest
+    networks:
+      - backend
+    labels:
+      - "interlock.hostname=test"
+      - "interlock.domain=local"
+
+networks:
+  backend: {}
