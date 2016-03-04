@@ -2,8 +2,8 @@ version: "2"
 
 services:
   # data volume container
-  nginx_config:
-    container_name: nginx_config
+  nginx-config:
+    container_name: pythonwebapp_nginx_config
     image: cirros
     volumes:
       - /etc/conf
@@ -11,34 +11,36 @@ services:
 
   # service discovery
   interlock:
-    container_name: interlock
+    container_name: pythonwebapp_interlock
     image: etoews/interlock
     command: -D run
+    restart: unless-stopped
     networks:
       - backend
     ports:
       - "80:8080"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
     volumes_from:
-      - nginx_config
+      - nginx-config
+      - container:swarm-data:ro
 
   # load balancer
   lb:
-    container_name: lb
+    container_name: pythonwebapp_lb
     image: nginx:1.9
     entrypoint: nginx
     command: -g "daemon off;" -c /etc/conf/nginx.conf
+    restart: unless-stopped
     networks:
       - backend
     labels:
       - "interlock.ext.name=nginx"
     volumes_from:
-      - nginx_config
+      - nginx-config
 
   # app
   app:
     image: ehazlett/docker-demo:latest
+    restart: unless-stopped
     networks:
       - backend
     labels:
