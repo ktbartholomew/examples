@@ -2,26 +2,26 @@ version: "2"
 
 services:
   # data volume container
-  nginx-config:
-    container_name: pythonwebapp_nginx_config
-    image: cirros
-    volumes:
-      - /etc/conf
-    command: /bin/true
+  # nginx-config:
+  #   container_name: pythonwebapp_nginx_config
+  #   image: cirros
+  #   volumes:
+  #     - /etc/conf
+  #   command: /bin/true
 
   # service discovery
-  interlock:
-    container_name: pythonwebapp_interlock
-    image: etoews/interlock
-    command: -D run
-    restart: unless-stopped
-    networks:
-      - backend
-    ports:
-      - "80:8080"
-    volumes_from:
-      - nginx-config
-      - container:swarm-data:ro
+  # interlock:
+  #   container_name: pythonwebapp_interlock
+  #   image: etoews/interlock
+  #   command: -D run
+  #   restart: unless-stopped
+  #   networks:
+  #     - backend
+  #   ports:
+  #     - "8080:8080"
+  #   volumes_from:
+  #     - nginx-config
+  #     - container:swarm-data:ro
 
   # load balancer
   lb:
@@ -32,10 +32,14 @@ services:
     restart: unless-stopped
     networks:
       - backend
+    ports:
+      - "80:80"
     labels:
       - "interlock.ext.name=nginx"
     volumes_from:
-      - nginx-config
+      - container:pythonwebapp_nginx_config
+    environment:
+      - constraint:node==*n1
 
   # app
   app:
