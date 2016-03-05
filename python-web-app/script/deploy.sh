@@ -37,7 +37,7 @@ if ! container_exists ${INTERLOCK} ; then
     --net ${NETWORK} \
     --publish 8080:8080 \
     --restart unless-stopped \
-    --volumes-from swarm-data \
+    --volumes-from swarm-data:ro \
     --volumes-from ${NGINX_CONFIG} \
     --env constraint:node==*-n1 \
     ${INTERLOCK_IMAGE} \

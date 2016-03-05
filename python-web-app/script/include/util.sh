@@ -42,3 +42,10 @@ output_nginx_config() {
     cirros \
     cat /etc/conf/nginx.conf
 }
+
+remove_nginx_config() {
+  docker run --rm \
+    --volumes-from ${NGINX_CONFIG} \
+    cirros \
+    rm /etc/conf/nginx.conf
+}
